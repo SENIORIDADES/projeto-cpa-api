@@ -10,14 +10,15 @@ services:
           delay: 5s
           max_attempts: 3
       ports:
-        - "3306:3306"
+        - "3307:3306"
       environment:
         MYSQL_DATABASE: ${MYSQLDB_DATABASE}
         MYSQL_ROOT_PASSWORD: ${MYSQLDB_PASSWORD}
       volumes:
-        - ./data:/var/lib/mysql
+        - mysql-data:/var/lib/mysql
       networks:
         - cpa-network
+
   api_service:
     build: .
     deploy:
@@ -34,6 +35,57 @@ services:
     networks:
       - cpa-network
 
+  jaeger-api:
+    image: jaegertracing/opentelemetry-all-in-one
+    container_name: jaeger-api
+    ports:
+      - 16686:16686
+    depends_on:
+      - collector-api
+
+  collector-api:
+    # image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: collector-api
+    volumes:
+      - ./collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - 4317:4317
+      - 4318:4318
+      - 8889:8889
+  
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --enable-feature=exemplar-storage
+      - --web.enable-remote-write-receiver
+    restart: always
+    ports:
+      - '9090:9090'
+    depends_on:
+      - collector-api
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    volumes:
+      - ./grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  
+
 networks:
   cpa-network:
     driver: bridge
+
+volumes:
+  mysql-data:
