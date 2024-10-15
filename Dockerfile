@@ -9,4 +9,4 @@ COPY opentelemetry/opentelemetry-javaagent.jar /usr/local/lib/opentelemetry/open
 COPY --from=build /home/app/target/cpa-0.0.1-SNAPSHOT.jar /usr/local/lib/cpa-0.0.1-SNAPSHOT.jar
 RUN chmod 755 /usr/local/lib/opentelemetry/opentelemetry-javaagent.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-javaagent:/usr/local/lib/opentelemetry/opentelemetry-javaagent.jar", "-Dotel.service.name=cpa", "-Dotel.traces.exporter=otlp", "-Dotel.metrics.exporter=none", "-Dotel.exporter.otlp.endpoint=http://collector-api:4318", "-Dotel.exporter.otlp.protocol=http/protobuf", "-jar", "/usr/local/lib/cpa-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-javaagent:/usr/local/lib/opentelemetry/opentelemetry-javaagent.jar", "-Dotel.service.name=cpa", "-Dotel.traces.exporter=otlp", "-Dotel.metrics.exporter=otlp", "-Dotel.exporter.otlp.endpoint=http://collector-api:4318", "-Dotel.exporter.otlp.protocol=http/protobuf", "-jar", "/usr/local/lib/cpa-0.0.1-SNAPSHOT.jar"]
