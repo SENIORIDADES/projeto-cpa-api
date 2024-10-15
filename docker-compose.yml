@@ -16,8 +16,8 @@ services:
         MYSQL_ROOT_PASSWORD: ${MYSQLDB_PASSWORD}
       volumes:
         - mysql-data:/var/lib/mysql
-      networks:
-        - cpa-network
+      # networks:
+      #   - cpa-network
 
   api_service:
     build: .
@@ -30,10 +30,11 @@ services:
       - "8080:8080"
     depends_on:
       - mysql_db
+      - collector-api
     environment:
         SPRING_PROFILES_ACTIVE: local
-    networks:
-      - cpa-network
+    # networks:
+    #   - cpa-network
 
   jaeger-api:
     image: jaegertracing/opentelemetry-all-in-one
@@ -42,6 +43,8 @@ services:
       - 16686:16686
     depends_on:
       - collector-api
+    # networks:
+    #   - cpa-network
 
   collector-api:
     # image: otel/opentelemetry-collector:latest
@@ -54,6 +57,8 @@ services:
       - 4317:4317
       - 4318:4318
       - 8889:8889
+    # networks:
+    #   - cpa-network
   
   prometheus:
     container_name: prometheus
@@ -69,6 +74,8 @@ services:
       - '9090:9090'
     depends_on:
       - collector-api
+    # networks:
+    #   - cpa-network
 
   grafana:
     container_name: grafana
@@ -80,12 +87,14 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+    # networks:
+    #   - cpa-network
 
   
 
-networks:
-  cpa-network:
-    driver: bridge
+# networks:
+#   cpa-network:
+#     driver: bridge
 
 volumes:
   mysql-data:

@@ -2,7 +2,7 @@ receivers:
   otlp:
     protocols:
       http:
-        endpoint: 0.0.0.0:8889
+        endpoint: 0.0.0.0:4318
 exporters:
   otlp/jaeger:
     endpoint: jaeger-api:4317
